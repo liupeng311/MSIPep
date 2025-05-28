@@ -1,3 +1,34 @@
 # MSIPep:Immunogenic peptide identification pipeline based on proteogenomic strategies for tumor antigen discovery
+Immunogenic peptide identification pipeline based on proteogenomic strategies for tumor antigen discovery
+##Overnew
 ![课题流程图-1 17_07](https://github.com/user-attachments/assets/fcc6111a-6f79-424d-b920-87cfcae10b03)
-#Overnew
+MSIPep, based on immunopeptide MS data. By analyzing the RNAseq data and immunopeptide MS data of patients, tumor neoantigens from the coding and non-coding regions were identified, including peptide segments that might come from circRNA and lncRNA. MSIPep consists of four modules. Module 1: Preprocessing of raw RNAseq data, which involves sequence alignment of tumor RNAseq data with the corresponding normal tissue RNAseq data or reference genomes to detect mutation sites and generate a theoretical mutation peptide library. And perform HLA typing calculation; Module 2: The original MS data is preprocessed and de novo sequencing is performed using PepNet. The peptide segments are preliminarily filtered through the two parameters of Score and PPM Difference. Module 3: Build a personalized reference protein database, conduct database search on DDA data using MAFragger and Comet, and identify DIA data using SpectraST and DIA-NN. Module 4: The binding affinity between peptides and MHC molecules was calculated using NetMHCpan, the binding affinity between pMHC molecules and TCR was calculated using ProTCR, and the Immunogenicity was calculated using DeepImmuno and IEDB tools ImmunoGenicity. Peptides with high immunogenicity were screened out. Compared with other processes, MSIPep has a lower threshold for input data and can provide more comprehensive identification results.
+##Table of Contents
+1.Features
+2.Install
+3.Usage
+4.Pipeline Modules
+5.Output Structure
+6.License
+7.Contact
+##Features
+MSIPep provides
+
+##Install
+NetMHCpan 
+DIA-NN
+
+##Usage
+jiang shu ju an yi xia ge shi fang zai data wen jain jia zhong 
+
+##Pipeline Modules
+RNA
+MS
+Peptide
+
+##Output Structure
+shuchushili 
+
+##License
+
+##Contact
