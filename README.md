@@ -97,4 +97,4 @@ python pep-filter.py input_folder hla_result_folder
 
 Calculating thebinding affinity between peptides and MHC molecules using NetMHCpan, calculatingthe binding affinity between pMHC molecules and TCR using in house ProTCR, and calculatingthe Immunogenicity using DeepImmuno and IEDB tools ImmunoGenicity; Peptideswith high immunogenicity being screened out. Compared with other processes,MSIPep has a lower requirement for input data and can provide morecomprehensive identification results.
 
-All required software, reference data files, and mutation annotation files can be downloaded from our Zenodo repository: After downloading, place the files in the specified directory.
+All required software, reference data files, and mutation annotation files can be downloaded from our Zenodo repository: https://doi.org/10.5281/zenodo.15960309. After downloading, place the files in the specified directory.
