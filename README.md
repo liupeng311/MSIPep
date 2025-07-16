@@ -7,13 +7,17 @@ MSIPep, based on immunopeptide MS data. By analyzing the RNAseq data and immunop
 
 2. Running environment
 MSIPep requires a Linux operation system(centos7) with Python(V3.7), Perl(V5.26) and Java(V1.7) installed.In addition, it is recommended to run the following commands in the terminal to ensure they work correctly.
-'''which wget
+'
+which wget
 which pip
-which gunzip'''
+which gunzip
+'
 
 Before getting started, please run the following code first:
-'''cd MSIPep
-bash start.sh'''
+'
+cd MSIPep
+bash start.sh
+'
 
 
 ##Table of Contents
