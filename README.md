@@ -14,10 +14,11 @@ which gunzip
  '''
 
 Before getting started, please run the following code first:
-' 
+```
 cd MSIPep
 bash start.sh
- '
+```
+
 
 
 ## Table of Contents
