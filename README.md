@@ -6,7 +6,7 @@ Immunogenic peptide identification pipeline based on proteogenomic strategies fo
 # 1.Introduction
 
 MSIPep is based on immunopeptidomics (MS) data for the identification of tumor antigens. MSIPep consists of four modules. 
-Module 1: Preprocess raw RNAseq data, including aligning tumor RNAseq data with corresponding normal tissue RNAseq data or reference genomes to detect mutation sites and generate a theoretical mutant peptide library. HLA typing is also performed. Module 2: Preprocess raw mass spectrometry (MS) data and perform *de novo* peptide sequencing using PepNet. Module 3: Construct a personalized reference protein database. Perform database searches on DDA data using MSFragger and Comet, and identify DIA data using SpectraST and DIA-NN. Module 4: Calculate the binding affinity between peptides and MHC molecules using NetMHCpan, the binding affinity between pMHC molecules and TCR using ProTCR, and assess immunogenicity using DeepImmuno and the IEDB ImmunoGenicity tool, to screen for peptides with high immunogenicity.
+Module 1: Preprocess raw RNAseq data, including aligning tumor RNAseq data with corresponding normal tissue RNAseq data or reference genomes to detect mutation sites and generate a theoretical mutant peptide library. HLA typing is also performed. Module 2: Preprocess raw MS data and perform *de novo* peptide sequencing using PepNet. Module 3: Construct a personalized reference protein database. Perform database searches on DDA data using MSFragger and Comet, and identify DIA data using SpectraST and DIA-NN. Module 4: Calculate the binding affinity between peptides and MHC molecules using NetMHCpan, the binding affinity between pMHC molecules and TCR using ProTCR, and assess immunogenicity using DeepImmuno and the IEDB ImmunoGenicity tool, to screen for peptides with high immunogenicity.
 
 # 2. Running environment
 MSIPep requires a Linux operation system(centos7) with Python(V3.7), Perl(V5.26) and Java(V1.7) installed.In addition, it is recommended to run the following commands in the terminal to ensure they work correctly.
@@ -71,7 +71,7 @@ python rna_pep.py -1 /patn/to/sample_1.fastq -2 /path/to/sample_2.fastq -t 16 --
 #eg.
 python ran-pep.py -1 sample_R1.fastq -2 sample_R2.fastq -t 16  --filter_col1 12  --filter_col2 13  --threshold 0.05
 ``` 
-Preprocessing of rawRNA-seq data, which involves sequence alignment of tumor RNA-seq data with thecorresponding normal tissue RNA-seq data or reference genomes to detectmutation sites and generate a theoretical mutation peptide library; and performingHLA typing calculation.
+Output the results of RNAseq data preprocessing and mutation detection. Please select the appropriate annotation database and specify the column (col) value in the table above. The threshold is based on the cancer incidence rate of the regional population.
 
 ## 4.2 Module 2 : Preprocessing of mass spectrometry (MS) data and *de novo* sequencing
 ``` 
@@ -79,7 +79,7 @@ python ms_denovo.py  --input_dir /path/to/raw_or_mgf_files  --output_dir /path/t
 #eg.
 python ms_donovo.py  --input_dir raw_or_mgf_files  --output_dir output_folder  --output_fasta denovo_result.fasta
 ``` 
-Preprocessing theoriginal MS data and *de novo* sequencing by PepNet; the peptide segments being preliminarily filtered through two parameters of Score and PPM Difference.
+If the input data is in RAW format, convert the data format first; if it is in MGF format, perform charge state checking directly. Please ensure that PepNet is functioning properly; if necessary, create a new conda environment.
 
 ## 4.3 Module 3 : Database search for peptide identification
 ```
@@ -87,7 +87,7 @@ python database.py --fasta_dir1 /path/to/fasta_group1  --fasta_list2 /path/to/ex
 #eg.
 python database.py --fasta_dir1 fasta_group1  --fasta_list2 extra.fasta  --mgf input.mgf  --output_dir output_folder
 ```
-Building apersonalized reference protein database, conducting database search on DDA datausing MSFragger and Comet, and identifying DIA data using SpectraST and DIA-NN.
+The identification results from the database search software are located in the original data folder.
 
 ## 4.4 Module 4 : Peptide quantification and filtering
 ``` 
@@ -96,6 +96,6 @@ python pep-filter.py /path/to/input_folder /path/to/hla_result_folder
 python pep-filter.py input_folder hla_result_folder
 ```
 
-Calculating thebinding affinity between peptides and MHC molecules using NetMHCpan, calculatingthe binding affinity between pMHC molecules and TCR using in house ProTCR, and calculatingthe Immunogenicity using DeepImmuno and IEDB tools ImmunoGenicity; Peptideswith high immunogenicity being screened out. Compared with other processes,MSIPep has a lower requirement for input data and can provide morecomprehensive identification results.
+The results of high-immunogenicity peptides are stored in the " pep_result " folder.
 
 All required software, reference data files, and mutation annotation files can be downloaded from our Zenodo repository: https://doi.org/10.5281/zenodo.15960309. After downloading, place the files in the specified directory.
