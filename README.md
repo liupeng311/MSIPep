@@ -38,6 +38,7 @@ numba
 # 3. Installation
 Before getting started, please run the following code first:
 ```
+chmod -R 777 /path/to/MSIPep/
 cd MSIPep
 bash start.sh
 ```
