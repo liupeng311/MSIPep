@@ -10,7 +10,7 @@ def filter_annovar_v3(input_file, col1_index, col2_index, threshold):
     coding_framstop = os.path.join(base_dir, "coding_framstop.txt")
     coding_nonfrasnv = os.path.join(base_dir, "coding_snvnonfra.txt")
 
-    with open(input_file, 'r') as infile,             open(output_coding, 'w', newline='') as coding_file,             open(output_non_coding, 'w', newline='') as non_coding_file:
+    with open(input_file, 'r') as infile,  open(output_coding, 'w', newline='') as coding_file, open(output_non_coding, 'w', newline='') as non_coding_file:
 
         reader = csv.reader(infile, delimiter='\t')
         coding_writer = csv.writer(coding_file, delimiter='\t')
@@ -40,7 +40,7 @@ def filter_annovar_v3(input_file, col1_index, col2_index, threshold):
                     non_coding_writer.writerow(row)
 
     # 对编码区结果进行再次分类
-    with open(output_coding, 'r') as coding_file,             open(coding_framstop, 'w', newline='') as framstop_file,             open(coding_nonfrasnv, 'w', newline='') as nonfrasnv_file:
+    with open(output_coding, 'r') as coding_file,open(coding_framstop, 'w', newline='') as framstop_file,open(coding_nonfrasnv, 'w', newline='') as nonfrasnv_file:
 
         reader = csv.reader(coding_file, delimiter='\t')
         framstop_writer = csv.writer(framstop_file, delimiter='\t')
