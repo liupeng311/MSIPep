@@ -9,29 +9,29 @@ def run_netmhcpan(input_folder, hla_folder):
     folder_name = os.path.basename(input_folder)
     print("[NetMHCpan] Running peptide-HLA binding prediction...")
 
-    # Step 1: 聚合所有候选肽段 fasta 文件（假设为 blastp-mut.fasta）
+    # Step 1: (blastp-mut.fasta) 
     fasta_file = os.path.join(input_folder, f"{folder_name}-blastp-mut.fasta")
     if not os.path.exists(fasta_file):
         print(f"Fasta file not found: {fasta_file}")
         return
 
-    # Step 2: 按长度分类保存到新 fasta 文件中
+    # Step 2: new fasta 
     length_to_records = {}
     for record in SeqIO.parse(fasta_file, "fasta"):
         l = len(record.seq)
         length_to_records.setdefault(l, []).append(record)
 
-    # Step 3: 获取 optitype 结果中的 HLA 类型
+    # Step 3:  optitype - HLA 
     optitype_result = next((f for f in os.listdir(hla_folder) if f.endswith("_result.tsv")), None)
     if not optitype_result:
         print(f"No OptiType result file found in {hla_folder}")
         return
     optitype_path = os.path.join(hla_folder, optitype_result)
     with open(optitype_path) as f:
-        hla_line = f.readlines()[1].strip().split('\t')[1:7]  # 假设前 6 列是 HLA
+        hla_line = f.readlines()[1].strip().split('\t')[1:7]  #  HLA
     hla_string = ','.join(hla_line)
 
-    # Step 4: 调用 netMHCpan 按长度运行
+    # Step 4:  netMHCpan 
     for length, records in length_to_records.items():
         out_fa = os.path.join(input_folder, f"{folder_name}_output_{length}.fasta")
         SeqIO.write(records, out_fa, "fasta")
@@ -84,7 +84,7 @@ def step2_blastp_classify(input_folder):
         SeqIO.write(records, tmp_fa, "fasta")
         blast_out = os.path.join(input_folder, f"{folder_name}-pMHC-blastp_{length}.txt")
         os.system(
-            f"blastp -query {tmp_fa} -db /data/liup/lost_found/software/ncbi-blast/test/human_uniprot "
+            f"blastp -query {tmp_fa} -db ./software/ncbi-blast/test/human_uniprot "
             f"-outfmt '6 qacc qseq sacc sseq evalue length pident' -evalue 1e9 -gapopen 11 -gapextend 1 > {blast_out}"
         )
         mut_out_txt = os.path.join(input_folder, f"{folder_name}-blastp-mut_{length}.txt")
@@ -184,8 +184,8 @@ def step4_immunogenicity(folder):
     out_8 = os.path.join(folder, f"{folder_name}-immunogenicity-pep_8.txt")
     out_9_11 = os.path.join(folder, f"{folder_name}-immunogenicity-pep_9_11.txt")
 
-    subprocess.run(['python', '/data/liup/software/A-IEDB-tools/immunogenicity/new-predict_immunogenicity.py', '--output', out_8, file_8])
-    subprocess.run(['python', '/data/liup/software/A-IEDB-tools/immunogenicity/new-predict_immunogenicity.py', '--custom_mask=2,3,9', '--output', out_9_11, file_9_11])
+    subprocess.run(['python', './immunogenicity/new-predict_immunogenicity.py', '--output', out_8, file_8])
+    subprocess.run(['python', './immunogenicity/new-predict_immunogenicity.py', '--custom_mask=2,3,9', '--output', out_9_11, file_9_11])
 
     merged = os.path.join(folder, f"{folder_name}-immunogenicity-pep.txt")
     with open(merged, 'w') as out:

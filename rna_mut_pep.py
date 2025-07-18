@@ -4,16 +4,16 @@ import subprocess
 import logging
 import csv
 
-# 配置日志
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def run_command(command):
-    logging.info(f"执行命令: {command}")
+    logging.info(f"Running command: {command}")
     try:
         subprocess.run(command, shell=True, check=True)
-        logging.info("执行成功")
+        logging.info("Command executed successfully")
     except subprocess.CalledProcessError as e:
-        logging.error(f"命令执行失败: {e}")
+        logging.error(f"Command execution failed: {e}")
         raise
 
 def run_rna_mutation_pipeline(rna_seq_1P, rna_seq_2P, threads):
@@ -76,34 +76,35 @@ def filter_annovar(input_file, col1_index, col2_index, threshold):
                 nonfrasnv_writer.writerow(row)
 
 def main():
-    parser = argparse.ArgumentParser(description="整合RNA突变分析全流程")
-    parser.add_argument("-1", "--rna_seq_1P", required=True, help="第一条RNA-Seq读段文件路径")
-    parser.add_argument("-2", "--rna_seq_2P", required=True, help="第二条RNA-Seq读段文件路径")
-    parser.add_argument("-t", "--threads", type=int, default=16, help="使用的线程数")
-    parser.add_argument("--filter_col1", type=int, required=True, help="过滤用的列1 (1-based)")
-    parser.add_argument("--filter_col2", type=int, required=True, help="过滤用的列2 (1-based)")
-    parser.add_argument("--threshold", type=float, default=0.05, help="过滤阈值")
+    parser = argparse.ArgumentParser(description="Integrated RNA mutation analysis pipeline")
+    parser.add_argument("-1", "--rna_seq_1P", required=True, help="Path to first RNA-Seq read file")
+    parser.add_argument("-2", "--rna_seq_2P", required=True, help="Path to second RNA-Seq read file")
+    parser.add_argument("-t", "--threads", type=int, default=16, help="Number of threads to use")
+    parser.add_argument("--filter_col1", type=int, required=True, help="Column 1 for filtering (1-based)")
+    parser.add_argument("--filter_col2", type=int, required=True, help="Column 2 for filtering (1-based)")
+    parser.add_argument("--threshold", type=float, default=0.05, help="Filtering threshold")
     args = parser.parse_args()
 
-    # 步骤1：运行 rna_mutation_pipeline.py
+    # Step 1: Run rna_mutation_pipeline.py
     run_rna_mutation_pipeline(args.rna_seq_1P, args.rna_seq_2P, args.threads)
 
     input_dir = os.path.dirname(args.rna_seq_1P)
     annovar_txt = os.path.join(input_dir, "mutadddb.hg38_multianno.txt")
 
-    # 步骤2：过滤 annovar 输出
+    # Step 2: Filter ANNOVAR output
     col1_index = args.filter_col1 + 10 - 1
     col2_index = args.filter_col2 + 10 - 1
     filter_annovar(annovar_txt, col1_index, col2_index, args.threshold)
 
-    # 步骤3：运行后续三个脚本
+    # Step 3: Run downstream peptide generation scripts
     run_command(f"python coding-pep.py -i {os.path.join(input_dir, 'noncoding-pep.txt')} -o {os.path.join(input_dir, 'nocoding-pep.fasta')}")
     run_command(f"python coding_snvnonfra.py {os.path.join(input_dir, 'coding_snvnonfra.txt')} {os.path.join(input_dir, 'coding_snvnonfra.fasta')}")
     run_command(f"python coding_framstop.py {os.path.join(input_dir, 'coding_framstop.txt')} {os.path.join(input_dir, 'coding_framstop.fasta')}")
 
-    logging.info("全部流程执行完毕！")
+    logging.info("Full pipeline execution completed successfully!")
 
 if __name__ == "__main__":
     main()
 
-#python run_full_pipeline.py -1 /路径/sample_1.fastq -2 /路径/sample_2.fastq -t 16  --filter_col1 12  --filter_col2 13  --threshold 0.05
+# Example usage:
+# python run_full_pipeline.py -1 /path/sample_1.fastq -2 /path/sample_2.fastq -t 16 --filter_col1 12 --filter_col2 13 --threshold 0.05

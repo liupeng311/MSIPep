@@ -65,7 +65,7 @@ def process_file(input_file, output_dir):
     if input_file.lower().endswith(".raw"):
         # Step 1: Convert raw -> mgf
         run_command(
-            f"singularity exec --cleanenv --bind {input_dir}:/data ../../software/msconvert.sif "
+            f"singularity exec --cleanenv --bind {input_dir}:/data ./software/msconvert.sif "
             f"wine msconvert /data/{base_name}.raw --mgf "
             f"--filter \"peakPicking true 1-\" --filter \"zeroSamples removeExtra\" --filter \"chargeStatePredictor\" "
             f"--outdir /data 2>/dev/null"
@@ -80,7 +80,7 @@ def process_file(input_file, output_dir):
     # Step 2: Add charge prediction again
     charged_mgf = os.path.join(input_dir, f"{base_name}_charge.mgf")
     run_command(
-        f"singularity exec --cleanenv --bind {input_dir}:/data ../../software/msconvert.sif "
+        f"singularity exec --cleanenv --bind {input_dir}:/data ./software/msconvert.sif "
         f"wine msconvert /data/{os.path.basename(mgf_file)} --mgf "
         f"--filter \"chargeStatePredictor\" "
         f"--outfile {base_name}_charge.mgf --outdir /data 2>/dev/null"
@@ -89,8 +89,8 @@ def process_file(input_file, output_dir):
     # Step 3: Run PepNet
     tsv_path = os.path.join(output_dir, f"{base_name}.tsv")
     run_command(
-        f"python ../../software/PepNet-master/denovo.py "
-        f"--input {charged_mgf} --model ../../software/PepNet-master/model.h5 "
+        f"python ./software/PepNet-master/denovo.py "
+        f"--input {charged_mgf} --model ./software/PepNet-master/model.h5 "
         f"--output {tsv_path}"
     )
 
