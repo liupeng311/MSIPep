@@ -42,3 +42,6 @@ unzip -o '*.zip'
 # Unzip nested zip files inside "humandb" directory
 cd ../humandb || exit 1
 unzip -o '*.zip'
+
+#Build reference genome index with BWA
+bwa index ./reference/hg38.fa
