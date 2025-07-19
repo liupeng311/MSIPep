@@ -68,33 +68,33 @@ Database name	Crowd	Serial number
 # 4.Usage
 ## 4.1 Module 1 : Preprocessing of RNA-seq data and detection of mutation sites; HLA typing analysis
 ``` 
-python rna_pep.py -1 /patn/to/sample_1.fastq -2 /path/to/sample_2.fastq -t 16 --filter_col1 col1 --filter_col2 col2 --threshold 0.05
+python rna_mut_pep.py -1 /patn/to/sample_1.fastq -2 /path/to/sample_2.fastq -t 16 --filter_col1 col1 --filter_col2 col2 --threshold 0.05
 #eg.
-python ran-pep.py -1 sample_R1.fastq -2 sample_R2.fastq -t 16  --filter_col1 12  --filter_col2 13  --threshold 0.05
+python rna_mut_pep.py -1 sample_R1.fastq -2 sample_R2.fastq -t 16  --filter_col1 12  --filter_col2 13  --threshold 0.05
 ``` 
 Output the results of RNAseq data preprocessing and mutation detection. Please select the appropriate annotation database and specify the column (col) value in the table above. The threshold is based on the cancer incidence rate of the regional population.
 
 ## 4.2 Module 2 : Preprocessing of mass spectrometry (MS) data and *de novo* sequencing
 ``` 
-python ms_denovo.py  --input_dir /path/to/raw_or_mgf_files  --output_dir /path/to/output_folder  --output_fasta /path/to/output_folder/final_filtered_peptides.fasta
+python denovo-pep.py  --input_dir /path/to/raw_or_mgf_files  --output_dir /path/to/output_folder  --output_fasta /path/to/output_folder/final_filtered_peptides.fasta
 #eg.
-python ms_donovo.py  --input_dir raw_or_mgf_files  --output_dir output_folder  --output_fasta denovo_result.fasta
+python donovo-pep.py  --input_dir raw_or_mgf_files  --output_dir output_folder  --output_fasta denovo_result.fasta
 ``` 
 If the input data is in RAW format, convert the data format first; if it is in MGF format, perform charge state checking directly. Please ensure that PepNet is functioning properly; if necessary, create a new conda environment.
 
 ## 4.3 Module 3 : Database search for peptide identification
 ```
-python database.py --fasta_dir1 /path/to/fasta_group1  --fasta_list2 /path/to/extra1.fasta  --mgf /path/to/input.mgf  --output_dir /path/to/output_folder
+python database_search.py --fasta_dir1 /path/to/fasta_group1  --fasta_list2 /path/to/extra1.fasta  --mgf /path/to/input.mgf  --output_dir /path/to/output_folder
 #eg.
-python database.py --fasta_dir1 fasta_group1  --fasta_list2 extra.fasta  --mgf input.mgf  --output_dir output_folder
+python database_search.py --fasta_dir1 fasta_group1  --fasta_list2 extra.fasta  --mgf input.mgf  --output_dir output_folder
 ```
 The identification results from the database search software are located in the original data folder.
 
 ## 4.4 Module 4 : Peptide quantification and filtering
 ``` 
-python pep-filter.py /path/to/input_folder /path/to/hla_result_folder
+python immunopep-filter.py /path/to/input_folder /path/to/hla_result_folder
 #eg.
-python pep-filter.py input_folder hla_result_folder
+python immunopep-filter.py input_folder hla_result_folder
 ```
 
 The results of high-immunogenicity peptides are stored in the " pep_result " folder.
