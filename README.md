@@ -34,6 +34,8 @@ numba
 6. Matplotlib
 7. Future
 ```
+Due to licensing restrictions, **SpectraST** and **DIA-NN** must be obtained separately by the user. **Only when immunopeptidomics data are of the DIA type**, the execution paths of SpectraST and DIA-NN should be specified in `database_search.py`.
+
 
 # 3. Installation
 Before getting started, please run the following code first:
