@@ -71,10 +71,12 @@ Database name	Crowd	Serial number
 ## 4.1 Module 1 : Preprocessing of RNA-seq data and detection of mutation sites; HLA typing analysis
 ``` 
 python rna_mut_pep.py -1 /patn/to/sample_1.fastq -2 /path/to/sample_2.fastq -t 16 --filter_col1 col1 --filter_col2 col2 --threshold 0.05
+#or
+python run_mut_pep.py -1 /path/to/sample_1.fastq -2 /path/to/sample_2.fastq -n1 /path/to/normal_1.fastq -n2 /path/to/normal_2.fastq -t 16 --filter_col1 12 --filter_col2 13 --threshold 0.05
 #eg.
 python rna_mut_pep.py -1 sample_R1.fastq -2 sample_R2.fastq -t 16  --filter_col1 12  --filter_col2 13  --threshold 0.05
 ``` 
-Output the results of RNAseq data preprocessing and mutation detection. Please select the appropriate annotation database and specify the column (col) value in the table above. The threshold is based on the cancer incidence rate of the regional population.
+Output the results of RNA-seq data preprocessing and variant calling. If RNA-seq data from the patient’s normal tissue is available, please specify the parameters "-n1" and "-n2" to denote the respective paired-end sequencing reads; the pipeline will then perform mutation detection utilizing both normal and tumor datasets. In the absence of normal tissue data, omit the "-n1" and "-n2" parameters, and the script will default to using the reference genome for variant identification. Additionally, select the appropriate annotation database and designate the corresponding column (col) value from the aforementioned table. The filtering threshold must be calibrated based on the cancer incidence rate of the local population.
 
 ## 4.2 Module 2 : Preprocessing of mass spectrometry (MS) data and *de novo* sequencing
 ``` 
