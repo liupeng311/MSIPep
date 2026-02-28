@@ -104,3 +104,55 @@ python immunopep-filter.py input_folder hla_result_folder
 The results of high-immunogenicity peptides are stored in the " pep_result " folder.
 
 All required software, reference data files, and mutation annotation files can be downloaded from our Zenodo repository: https://doi.org/10.5281/zenodo.15960309. After downloading, place the files in the specified directory.
+
+##4.1
+docker run --rm \
+  -v /data:/data \
+  msipep:latest \
+  python rna_mut_pep.py \
+    -1 /data/sample_R1.fastq \
+    -2 /data/sample_R2.fastq \
+    -t 16 \
+    --filter_col1 12 \
+    --filter_col2 13 \
+    --threshold 0.05
+
+  docker run --rm \
+  -v /data:/data \
+  msipep:latest \
+  python rna_mut_pep.py \
+    -1 /data/tumor_R1.fastq \
+    -2 /data/tumor_R2.fastq \
+    -n1 /data/normal_R1.fastq \
+    -n2 /data/normal_R2.fastq \
+    -t 16 \
+    --filter_col1 12 \
+    --filter_col2 13 \
+    --threshold 0.05
+  
+  ##4.2
+  docker run --rm \
+  -v /data:/data \
+  msipep:latest \
+  python denovo-pep.py \
+    --input_dir /data/raw_or_mgf_files \
+    --output_dir /data/output_folder \
+    --output_fasta /data/output_folder/final_filtered_peptides.fasta
+    
+  ##4.3
+  docker run --rm \
+  -v /data:/data \
+  msipep:latest \
+  python database_search.py \
+    --fasta_dir1 /data/fasta_group1 \
+    --fasta_list2 /data/extra1.fasta \
+    --mgf /data/input.mgf \
+    --output_dir /data/output_folder
+    
+  ##4.4
+  docker run --rm \
+  -v /data:/data \
+  msipep:latest \
+  python immunopep-filter.py \
+    /data/input_folder \
+    /data/hla_result_folder
