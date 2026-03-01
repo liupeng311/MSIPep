@@ -120,7 +120,7 @@ Data Volume: Always use the -v flag to mount your local data directory to the co
 ## 5.3 Quick Start (Usage)
 MSIPep consists of several functional modules. You can run specific scripts based on your research needs.
 
-### 5.3.1 RNA Variant Calling & Peptide Generation (rna_mut_pep.py)
+### 5.3.1 RNA Variant Calling & Peptide Generation
 
 Tumor-only mode:
 ```
@@ -133,19 +133,19 @@ docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
 python rna_mut_pep.py -1 /data/tumor_R1.fastq  -2 /data/tumor_R2.fastq -n1 /data/normal_R1.fastq -n2 /data/normal_R2.fastq -t 16 --filter_col1 12 --filter_col2 13  --threshold 0.05
 ```
 
-### 5.3.2 De novo Peptide Sequencing (denovo-pep.py)
+### 5.3.2 De novo Peptide Sequencing
 ```
 docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
 python denovo-pep.py --input_dir /data/raw_or_mgf_files --output_dir /data/output_folder --output_fasta /data/output_folder/final_filtered_peptides.fasta
 ```
 
-### 5.3.3 Database Search & Validation (database_search.py)
+### 5.3.3 Database Search & Validation
 ```
 docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
 python database_search.py --fasta_dir1 /data/fasta_group1 --fasta_list2 /data/extra1.fasta --mgf /data/input.mgf --output_dir /data/output_folder
 ```
 
-### 5.3.4 Immunopeptide Filtering (immunopep-filter.py)
+### 5.3.4 Immunopeptide Filtering
 ```
 docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
 python immunopep-filter.py data/input_folder /data/hla_result_folder
