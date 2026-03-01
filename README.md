@@ -105,54 +105,48 @@ The results of high-immunogenicity peptides are stored in the " pep_result " fol
 
 All required software, reference data files, and mutation annotation files can be downloaded from our Zenodo repository: https://doi.org/10.5281/zenodo.15960309. After downloading, place the files in the specified directory.
 
-##4.1
-docker run --rm \
-  -v /data:/data \
-  msipep:latest \
-  python rna_mut_pep.py \
-    -1 /data/sample_R1.fastq \
-    -2 /data/sample_R2.fastq \
-    -t 16 \
-    --filter_col1 12 \
-    --filter_col2 13 \
-    --threshold 0.05
+# 5.Docker
 
-  docker run --rm \
-  -v /data:/data \
-  msipep:latest \
-  python rna_mut_pep.py \
-    -1 /data/tumor_R1.fastq \
-    -2 /data/tumor_R2.fastq \
-    -n1 /data/normal_R1.fastq \
-    -n2 /data/normal_R2.fastq \
-    -t 16 \
-    --filter_col1 12 \
-    --filter_col2 13 \
-    --threshold 0.05
-  
-  ##4.2
-  docker run --rm \
-  -v /data:/data \
-  msipep:latest \
-  python denovo-pep.py \
-    --input_dir /data/raw_or_mgf_files \
-    --output_dir /data/output_folder \
-    --output_fasta /data/output_folder/final_filtered_peptides.fasta
-    
-  ##4.3
-  docker run --rm \
-  -v /data:/data \
-  msipep:latest \
-  python database_search.py \
-    --fasta_dir1 /data/fasta_group1 \
-    --fasta_list2 /data/extra1.fasta \
-    --mgf /data/input.mgf \
-    --output_dir /data/output_folder
-    
-  ##4.4
-  docker run --rm \
-  -v /data:/data \
-  msipep:latest \
-  python immunopep-filter.py \
-    /data/input_folder \
-    /data/hla_result_folder
+## 5.1 Pull the Image
+You can pull the pre-configured image containing all necessary environments and scripts directly from Docker Hub:
+```
+docker pull liupeng311/neoantigen-pipeline:msipep
+```
+## 5.2 Environment Requirements
+Docker: Version 20.10.0 or higher is recommended.
+Hardware Resources: Due to the intensive nature of variant calling, a minimum of 16 CPU cores and 64GB RAM is suggested.
+Data Volume: Always use the -v flag to mount your local data directory to the container.
+
+## 5.3 Quick Start (Usage)
+MSIPep consists of several functional modules. You can run specific scripts based on your research needs.
+
+### 5.3.1 RNA Variant Calling & Peptide Generation (rna_mut_pep.py)
+
+Tumor-only mode:
+```
+docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
+python rna_mut_pep.py -1 /data/sample_R1.fastq -2 /data/sample_R2.fastq -t 16 --filter_col1 12 --filter_col2 13 --threshold 0.05
+```
+Tumor-Normal matched mode (Recommended):
+```
+docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
+python rna_mut_pep.py -1 /data/tumor_R1.fastq  -2 /data/tumor_R2.fastq -n1 /data/normal_R1.fastq -n2 /data/normal_R2.fastq -t 16 --filter_col1 12 --filter_col2 13  --threshold 0.05
+```
+
+### 5.3.2 De novo Peptide Sequencing (denovo-pep.py)
+```
+docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
+python denovo-pep.py --input_dir /data/raw_or_mgf_files --output_dir /data/output_folder --output_fasta /data/output_folder/final_filtered_peptides.fasta
+```
+
+### 5.3.3 Database Search & Validation (database_search.py)
+```
+docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
+python database_search.py --fasta_dir1 /data/fasta_group1 --fasta_list2 /data/extra1.fasta --mgf /data/input.mgf --output_dir /data/output_folder
+```
+
+### 5.3.4 Immunopeptide Filtering (immunopep-filter.py)
+```
+docker run --rm -v /data:/data liupeng311/neoantigen-pipeline:msipep \
+python immunopep-filter.py data/input_folder /data/hla_result_folder
+```
