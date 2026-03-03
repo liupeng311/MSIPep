@@ -17,7 +17,18 @@ def run_command(command):
         raise
 
 def run_rna_mutation_pipeline(rna_seq_1P, rna_seq_2P, threads):
-    run_command(f"python rna_mutation_pipeline.py -rna_seq_1P {rna_seq_1P} -rna_seq_2P {rna_seq_2P} -threads {threads}")
+    run_command(
+        f"python ./rna/1.rna_mutation_pipeline.py "
+        f"-rna_seq_1P {rna_seq_1P} -rna_seq_2P {rna_seq_2P} -threads {threads}"
+    )
+
+def run_rna_tumor_normal_mutation_pipeline(tumor_rna_1P, tumor_rna_2P, normal_rna_1P, normal_rna_2P, threads, output_dir):
+    run_command(
+        f"python ./rna/1.rna_normal_tumor_mutation.py "
+        f"-tumor_rna_1P {tumor_rna_1P} -tumor_rna_2P {tumor_rna_2P} "
+        f"-normal_rna_1P {normal_rna_1P} -normal_rna_2P {normal_rna_2P} "
+        f"-output_dir {output_dir} -threads {threads}"
+    )
 
 def filter_annovar(input_file, col1_index, col2_index, threshold):
     base_dir = os.path.dirname(input_file)
@@ -79,17 +90,32 @@ def main():
     parser = argparse.ArgumentParser(description="Integrated RNA mutation analysis pipeline")
     parser.add_argument("-1", "--rna_seq_1P", required=True, help="Path to first RNA-Seq read file")
     parser.add_argument("-2", "--rna_seq_2P", required=True, help="Path to second RNA-Seq read file")
+    parser.add_argument("-n1", "--normal_rna_1P", help="Path to first normal RNA-Seq read file")
+    parser.add_argument("-n2", "--normal_rna_2P", help="Path to second normal RNA-Seq read file")
     parser.add_argument("-t", "--threads", type=int, default=16, help="Number of threads to use")
     parser.add_argument("--filter_col1", type=int, required=True, help="Column 1 for filtering (1-based)")
     parser.add_argument("--filter_col2", type=int, required=True, help="Column 2 for filtering (1-based)")
     parser.add_argument("--threshold", type=float, default=0.05, help="Filtering threshold")
     args = parser.parse_args()
 
-    # Step 1: Run rna_mutation_pipeline.py
-    run_rna_mutation_pipeline(args.rna_seq_1P, args.rna_seq_2P, args.threads)
-
     input_dir = os.path.dirname(args.rna_seq_1P)
-    annovar_txt = os.path.join(input_dir, "mutadddb.hg38_multianno.txt")
+
+    # Step 1: Run mutation detection pipeline (tumor-only or tumor-normal)
+    if args.normal_rna_1P and args.normal_rna_2P:
+        logging.info("Detected normal RNA-Seq inputs, running tumor-normal mutation pipeline.")
+        run_rna_tumor_normal_mutation_pipeline(
+            args.rna_seq_1P,
+            args.rna_seq_2P,
+            args.normal_rna_1P,
+            args.normal_rna_2P,
+            args.threads,
+            input_dir,
+        )
+        annovar_txt = os.path.join(input_dir, "somatic_mutations_annovar.hg38_multianno.txt")
+    else:
+        logging.info("No normal RNA-Seq inputs provided, running tumor-only mutation pipeline.")
+        run_rna_mutation_pipeline(args.rna_seq_1P, args.rna_seq_2P, args.threads)
+        annovar_txt = os.path.join(input_dir, "mutadddb.hg38_multianno.txt")
 
     # Step 2: Filter ANNOVAR output
     col1_index = args.filter_col1 + 10 - 1
@@ -107,4 +133,7 @@ if __name__ == "__main__":
     main()
 
 # Example usage:
+# Tumor-only:
 # python run_full_pipeline.py -1 /path/sample_1.fastq -2 /path/sample_2.fastq -t 16 --filter_col1 12 --filter_col2 13 --threshold 0.05
+# Tumor-normal:
+# python run_full_pipeline.py -1 /path/tumor_1.fastq -2 /path/tumor_2.fastq -n1 /path/normal_1.fastq -n2 /path/normal_2.fastq -t 16 --filter_col1 12 --filter_col2 13 --threshold 0.05
