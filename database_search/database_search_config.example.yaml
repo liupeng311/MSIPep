@@ -1,0 +1,180 @@
+# =============================================================================
+
+# Database search pipeline config
+
+# Copy this file to database_search_config.yaml and edit for your environment
+
+# Run: python run_database_search_pipeline.py --config database_search_config.yaml
+
+# =============================================================================
+
+
+
+# -----------------------------------------------------------------------------
+
+# Pipeline mode
+
+# -----------------------------------------------------------------------------
+
+# full             : merge DB + search + post-process + Class I merge (full pipeline)
+
+# search_only      : merge DB and run MSFragger/Comet search only
+
+# postprocess_only : existing search results; post-process and merge Class I only
+
+# msfragger_only   : MSFragger search + post-process only (requires raw)
+
+# comet_only       : Comet search + post-process only (requires mgf)
+
+mode: full
+
+
+
+# -----------------------------------------------------------------------------
+
+# Sample and output
+
+# -----------------------------------------------------------------------------
+
+sample_name: SAMPLE01
+
+output_dir: /data/output/SAMPLE01/database_search
+
+
+
+# -----------------------------------------------------------------------------
+
+# Input
+
+# -----------------------------------------------------------------------------
+
+input:
+
+  # Protein database FASTA list for search (concatenated in order as combined_protein_db.fasta)
+
+  # Typical combination: reference proteome + mutant peptide DB + noncoding peptide DB + decoy
+
+  fasta_list:
+
+    - /data/db/reference_proteome.fasta
+
+    - /data/db/SAMPLE01_coding_mut_pep_MT.fasta
+
+    - /data/db/SAMPLE01_noncoding_mut_pep.fasta
+
+
+
+  # MSFragger input (.raw, multiple allowed)
+
+  raw:
+
+    - /data/ms/SAMPLE01.raw
+
+
+
+  # Comet input (single .mgf)
+
+  mgf: /data/ms/SAMPLE01.mgf
+
+
+
+# -----------------------------------------------------------------------------
+
+# Tool paths
+
+# -----------------------------------------------------------------------------
+
+tools:
+
+  msfragger_dir: ./software/MSFragger-3.8
+
+  comet_dir: ./software/comet
+
+  comet_exe: /data/software/comet/comet.2021010.linux.exe
+
+  java_memory: 64G
+
+
+
+# -----------------------------------------------------------------------------
+
+# MSFragger post-processing (msfragger-pep-I.py)
+
+# -----------------------------------------------------------------------------
+
+msfragger_filter:
+
+  min_length: 8
+
+  max_length: 11
+
+  max_expectation: 0.01
+
+  min_hyperscore: 15
+
+
+
+# -----------------------------------------------------------------------------
+
+# Comet post-processing (comet-pep.py)
+
+# -----------------------------------------------------------------------------
+
+comet_filter:
+
+  xcorr_threshold: 2.0
+
+  evalue_threshold: 0.01
+
+  min_deltacn: 0.05
+
+  min_length: 8
+
+  max_length: 11
+
+  strict_deltacn: false
+
+
+
+# -----------------------------------------------------------------------------
+
+# Class I merge (built into database_search.py)
+
+# -----------------------------------------------------------------------------
+
+merge:
+
+  enabled: true
+
+  # join: join multiple headers for same peptide with |; first: keep first header only
+
+  header_mode: join
+
+
+
+# -----------------------------------------------------------------------------
+
+# Other options
+
+# -----------------------------------------------------------------------------
+
+options:
+
+  keep_decoy: false
+
+
+
+# -----------------------------------------------------------------------------
+
+# Pipeline control
+
+# -----------------------------------------------------------------------------
+
+steps:
+
+  run_search: true
+
+  run_postprocess: true
+
+  run_merge_class1: true
+

@@ -1,0 +1,128 @@
+# =============================================================================
+
+# De Novo peptide identification pipeline config
+
+# Copy this file to denovo_config.yaml and edit for your environment
+
+# Run: python run_denovo_pipeline.py --config denovo_config.yaml
+
+# =============================================================================
+
+
+
+# -----------------------------------------------------------------------------
+
+# Pipeline mode
+
+# -----------------------------------------------------------------------------
+
+# full        : RAW/MGF → PepNet → filter → FASTA (full pipeline)
+
+# filter_only : PepNet TSV already exists; run filter and export FASTA only
+
+mode: full
+
+
+
+# -----------------------------------------------------------------------------
+
+# Sample and output
+
+# -----------------------------------------------------------------------------
+
+sample_name: SAMPLE01
+
+output_dir: /data/output/SAMPLE01/denovo
+
+
+
+# -----------------------------------------------------------------------------
+
+# Input
+
+# -----------------------------------------------------------------------------
+
+input:
+
+  # full mode: directory containing .raw or .mgf files
+
+  raw_mgf_dir: /data/ms/SAMPLE01/raw_or_mgf
+
+
+
+  # filter_only mode: PepNet output TSV directory or file list
+
+  # Can be a directory, a single .tsv, or a glob path
+
+  tsv:
+
+    - /data/output/SAMPLE01/denovo/*.tsv
+
+
+
+# -----------------------------------------------------------------------------
+
+# Tool paths
+
+# -----------------------------------------------------------------------------
+
+tools:
+
+  # msconvert (Singularity image for RAW→MGF and charge prediction)
+
+  msconvert_sif: ./software/msconvert.sif
+
+  # PepNet
+
+  pepnet_python: python
+
+  pepnet_script: ./software/PepNet-master/denovo.py
+
+  pepnet_model: ./software/PepNet-master/model.h5
+
+
+
+# -----------------------------------------------------------------------------
+
+# Step 2: TSV filter parameters (2.pepnet-filter.py)
+# Methods §2.4: Score ≥ 0.85, |PPM Difference| ≤ 10 ppm
+
+# -----------------------------------------------------------------------------
+
+filter:
+
+  # Output mode: merged (single FASTA) | per_file (one *-i.fasta per TSV)
+
+  output_mode: merged
+
+  merged_fasta_name: "{sample}_denovo_filtered.fasta"
+
+
+
+  min_length: 8
+
+  max_length: 11
+
+  # When true, filter by length only
+
+  length_only: false
+
+  min_score: 0.85
+  max_ppm_difference: 10.0
+  # Methods: Score + PPM only; set to 0 or omit to disable Positional Score filter
+  min_avg_positional_score: 0
+
+
+
+# -----------------------------------------------------------------------------
+
+# Pipeline control (resume from checkpoint)
+
+# -----------------------------------------------------------------------------
+
+steps:
+
+  run_pepnet: true       # Step 1: denovo-pep.py (msconvert + PepNet)
+
+  run_filter: true       # Step 2: 2.pepnet-filter.py
+

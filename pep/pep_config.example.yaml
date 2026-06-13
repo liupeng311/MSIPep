@@ -1,0 +1,82 @@
+# =============================================================================
+# Immunopeptide screening pipeline config (pep module)
+# Copy to pep_config.yaml and edit paths
+# Run: python run_pep_pipeline.py --config pep_config.yaml
+# Parameters aligned with Methods §2.5
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Sample and work directory
+# -----------------------------------------------------------------------------
+sample_name: SAMPLE01
+work_dir: /data/output/SAMPLE01/pep
+
+# -----------------------------------------------------------------------------
+# Input
+# -----------------------------------------------------------------------------
+input:
+  classI_fasta: /data/output/SAMPLE01/database_search/merged_classI_dedup.fasta
+  # OptiType output dir (Methods: OptiType v1.3.5, -r --enumerate 1)
+  optitype_dir: /data/output/SAMPLE01/hla
+  hla_alleles: ""
+
+# -----------------------------------------------------------------------------
+# Tool paths
+# -----------------------------------------------------------------------------
+tools:
+  blastp: ""
+  blastp_db: ./software/ncbi-blast/test/human_uniprot
+  netmhcpan: netMHCpan
+  iedb_script: ./immunogenicity/new-predict_immunogenicity.py
+  deepimmuno_script: ./deepimmuno-cnn.py
+
+# -----------------------------------------------------------------------------
+# Step 1: blastp — 100% identity exclusion (Methods)
+# -----------------------------------------------------------------------------
+blastp:
+  keep_blast_tsv: true
+
+# -----------------------------------------------------------------------------
+# Step 2: NetMHCpan — SBP %Rank≤0.5, WBP %Rank≤2 (Methods)
+# -----------------------------------------------------------------------------
+netmhcpan:
+  lengths: "8,9,10,11"
+
+# -----------------------------------------------------------------------------
+# Step 3: IEDB — mask 2,3,C-term; score > 0 (Methods)
+# -----------------------------------------------------------------------------
+iedb:
+  min_score: 0.0              # keep peptides with score strictly > 0
+
+# -----------------------------------------------------------------------------
+# Step 4: DeepImmuno — 9/10mer, score ≥ 0.5 (Methods)
+# -----------------------------------------------------------------------------
+deepimmuno:
+  threshold: 0.5
+  default_hla: ""
+
+# -----------------------------------------------------------------------------
+# Steps 5–7: ProTCR — plabels ≥ 0.9 (Methods)
+# -----------------------------------------------------------------------------
+protcr:
+  install_dir: /data/liup/software/protcr
+  python: ""
+  run_script: run_protcr.py
+  batch_script: batch_run_protcr.sh
+  mode: single
+  results_dir: ""
+  result_search_dirs: []
+  plabels_threshold: 0.9
+  output_format: csv
+
+# -----------------------------------------------------------------------------
+# Pipeline control
+# -----------------------------------------------------------------------------
+steps:
+  run_blastp: true
+  run_netmhcpan: true
+  run_iedb: true
+  run_deepimmuno: true
+  run_protcr_input: true
+  run_protcr_run: true
+  run_protcr_filter: true

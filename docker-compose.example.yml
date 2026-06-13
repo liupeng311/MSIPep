@@ -1,0 +1,14 @@
+services:
+  msipep:
+    build: .
+    image: msipep:latest
+    volumes:
+      - /path/to/your/data:/data
+      - /path/to/your/reference:/ref
+      - /path/to/your/software:/software
+    environment:
+      - MSIPEP_DATA=/data
+      - MSIPEP_REF=/ref
+      - MSIPEP_SOFTWARE=/software
+    entrypoint: ["/opt/msipep/docker/entrypoint.sh"]
+    command: ["help"]
