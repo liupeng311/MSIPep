@@ -97,17 +97,6 @@ Root-level `run_*.py` files delegate to the copies inside each module directory;
 
 # 4. Usage
 
-General form:
-
-```bash
-conda activate <env>    # see Section 2.2
-python run_<module>_pipeline.py --config /path/to/config.yaml
-```
-
-Configs accept `.yaml`, `.yml`, or `.json`. Each pipeline skips steps whose output already exists, or when `steps.<name>: false` in the config.
-
----
-
 ## 4.1 Module 1 — RNA-seq → mutation peptides
 
 **Environment:** `msipep`
@@ -115,19 +104,6 @@ Configs accept `.yaml`, `.yml`, or `.json`. Each pipeline skips steps whose outp
 ```bash
 conda activate msipep
 python run_rnaseq_pipeline.py --config /data/SAMPLE01/pipeline_config.yaml
-```
-
-### CLI options
-
-| Option | Default | Choices |
-|--------|---------|---------|
-| `--config` | (required) | path to YAML/JSON |
-| `--from-step` | `mutation_calling` | `mutation_calling`, `vep`, `vcf_filter`, `vcf_split`, `coding_peptides`, `noncoding_peptides` |
-| `--to-step` | `noncoding_peptides` | same as above |
-
-```bash
-# Resume from VEP
-python run_rnaseq_pipeline.py --config /data/SAMPLE01/pipeline_config.yaml --from-step vep
 ```
 
 ### Config: `pipeline_config.yaml` (required fields)
@@ -141,25 +117,8 @@ python run_rnaseq_pipeline.py --config /data/SAMPLE01/pipeline_config.yaml --fro
 | `input.tumor_rna_*` / `normal_rna_*` | Tumor/normal FASTQ (`tumor_normal`) |
 | `reference.*` | `genome_fasta`, `star_index`, `gtf` |
 | `tools.*` | Trimmomatic, VEP, ANNOVAR paths |
-| `vcf_filter.*` | Defaults: `min_t_depth: 10`, `min_t_alt_count: 5`, `min_vaf: 0.05`, `max_gnomad_af: 0.01` |
 | `peptide.*` | `flanking_length: 24`, `downstream_length: 0`, `noncoding_window: 100`, `noncoding_lengths: "8,9,10,11"` |
 
-### Internal steps
-
-| Step | Script |
-|------|--------|
-| mutation_calling | `1.rna_mutation_pipeline.py` / `1.rna_SE_mutation_pipeline.py` / `1.rna_normal_tumor_mutation.py` |
-| vep | Ensembl VEP (shell) |
-| vcf_filter | `2_VCF_filter_WGS.py` |
-| vcf_split | `3.vcf_split.py` |
-| coding_peptides | `5.coding_mut_pep.py` |
-| noncoding_peptides | `4.nocoding_mut_pep.py` |
-
-### Main outputs (under `output_dir`)
-
-- `{sample}_coding_mut_pep.fasta` (and `_MT.fasta`, `_WT.fasta`)
-- `{sample}_noncoding_mut_pep.fasta`
-- `{sample}_vep_annotated_filter.vcf`, coding/non-coding split VCFs
 
 **HLA typing:** run OptiType separately (`conda activate optitype`); pass result folder to Module 4 as `input.optitype_dir`.
 
@@ -173,15 +132,6 @@ python run_rnaseq_pipeline.py --config /data/SAMPLE01/pipeline_config.yaml --fro
 conda activate pepnet
 python run_denovo_pipeline.py --config /data/SAMPLE01/denovo_config.yaml
 ```
-
-### CLI options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--config` | (required) | path to YAML/JSON |
-| `--mode` | from config (`full`) | `full` \| `filter_only` (overrides config) |
-| `--from-step` | all steps | `pepnet` \| `filter` |
-| `--to-step` | all steps | `pepnet` \| `filter` |
 
 ```bash
 # Only filter existing PepNet TSV
@@ -199,15 +149,7 @@ python run_denovo_pipeline.py --config /data/SAMPLE01/denovo_config.yaml --mode 
 | `input.tsv` | TSV path(s) or glob (`filter_only` mode) |
 | `tools.msconvert_sif` | msconvert Singularity image |
 | `tools.pepnet_script` / `pepnet_model` | PepNet paths |
-| `filter.min_score` | Default `0.85` |
-| `filter.max_ppm_difference` | Default `10.0` |
-| `filter.min_length` / `max_length` | Default `8` / `11` |
 | `filter.output_mode` | `merged` → `{sample}_denovo_filtered.fasta`; or `per_file` |
-
-### Internal steps
-
-1. `denovo-pep.py` — msconvert (RAW) + PepNet → `*.tsv`
-2. `2.pepnet-filter.py` — Score/PPM/length filter → FASTA
 
 ---
 
@@ -219,13 +161,6 @@ python run_denovo_pipeline.py --config /data/SAMPLE01/denovo_config.yaml --mode 
 conda activate msipep
 python run_database_search_pipeline.py --config /data/SAMPLE01/database_search_config.yaml
 ```
-
-### CLI options
-
-| Option | Description |
-|--------|-------------|
-| `--config` | (required) path to YAML/JSON |
-| `--mode` | Optional override: `full`, `search_only`, `postprocess_only`, `msfragger_only`, `comet_only` |
 
 ```bash
 python run_database_search_pipeline.py --config /data/SAMPLE01/database_search_config.yaml --mode postprocess_only
@@ -242,8 +177,6 @@ python run_database_search_pipeline.py --config /data/SAMPLE01/database_search_c
 | `input.raw` | MSFragger `.raw` file(s) |
 | `input.mgf` | Comet `.mgf` file |
 | `tools.msfragger_dir` / `comet_dir` / `comet_exe` | Search engine paths |
-| `msfragger_filter.*` | Default peptide length 8–11, `max_expectation: 0.01`, `min_hyperscore: 15` |
-| `comet_filter.*` | Default `xcorr_threshold: 2.0`, `evalue_threshold: 0.01`, length 8–11 |
 
 Orchestrator calls `database_search.py`, which runs search, then `msfragger-pep-I.py` / `comet-pep.py`, and merges Class I peptides.
 
@@ -275,42 +208,12 @@ Alternatively, set `protcr.python` to the protcr env Python and run the full pip
 | `--from-step` | `blastp` | `blastp`, `netmhcpan`, `iedb`, `deepimmuno`, `protcr_input`, `protcr_run`, `protcr_filter` |
 | `--to-step` | `protcr_filter` | same as above |
 
-### Config: `pep_config.yaml` (required: `sample_name`, `work_dir`)
-
-| Key | Description |
-|-----|-------------|
-| `input.classI_fasta` | Usually Module 3 `merged_classI_dedup.fasta` |
-| `input.hla_alleles` | Comma-separated HLA alleles, **or** |
-| `input.optitype_dir` | OptiType `*_result.tsv` directory |
-| `tools.blastp_db` | Human proteome BLAST database prefix |
-| `tools.iedb_script` | Default `./immunogenicity/new-predict_immunogenicity.py` |
-| `tools.deepimmuno_script` | DeepImmuno script path |
-| `iedb.min_score` | Default `0.0` (keep peptides with score **>** 0) |
-| `deepimmuno.threshold` | Default `0.5` (9/10mer) |
-| `protcr.install_dir` | ProTCR repo with `run_protcr.py` |
-| `protcr.plabels_threshold` | Default `0.9` |
-| `protcr.mode` | `single` (one CSV) or `batch` (`batch_run_protcr.sh`) |
-
-### Internal steps (under `work_dir`)
-
-| Step | Script | Output file |
-|------|--------|-------------|
-| blastp | `1.blastp.py` | `{sample}_classI_mut.fasta` |
-| netmhcpan | `2.netmhcpan_filter.py` | `{sample}_SWB.fasta` |
-| iedb | `3.iedb_filter.py` | `{sample}_IEDB.fasta` |
-| deepimmuno | `4.deepimmuno_filter.py` | `{sample}_deepimmuno.fasta` |
-| protcr_input | `5.protcr_input.py` | `{sample}_tcr_input.csv` |
-| protcr_run | `6.protcr_run.py` | ProTCR result CSVs |
-| protcr_filter | `7.protcr_filter.py` | `protcr_filtered/*_filtered.csv` |
-
 Toggle steps with `steps.run_blastp`, `steps.run_iedb`, etc. in the config.
 
 ---
 
 # 5. Docker
-
 The repository includes a **slim image** (`Dockerfile`): pipeline scripts + Conda envs only. **Reference, software bundles, and sample data are mounted at run time** (not required for `docker build`).
-
 ## 5.1 Build image
 
 ```bash
@@ -325,15 +228,7 @@ bash start.sh
 ```
 
 ## 5.2 Run with volume mounts
-
 Mount three host directories and point YAML paths to container paths:
-
-| Host | Container | Contents |
-|------|-----------|----------|
-| project data | `/data` | FASTQ, MS files, configs, outputs |
-| reference | `/ref` | hg38, STAR index, VEP cache, gnomAD |
-| software | `/software` | Zenodo tools from `start.sh` |
-
 Example — Module 1:
 
 ```bash
@@ -344,37 +239,17 @@ docker run --rm \
   msipep:latest rnaseq \
   --config /data/SAMPLE01/pipeline_config.yaml
 ```
-
 ## 5.3 Entrypoint modules
-
 The container `ENTRYPOINT` is `docker/entrypoint.sh`. First argument selects the module; remaining arguments are passed to the orchestration script:
-
-| Module arg | Conda env | Script |
-|------------|-----------|--------|
-| `rnaseq` | msipep | `run_rnaseq_pipeline.py` |
-| `denovo` | pepnet | `run_denovo_pipeline.py` |
-| `database_search` | msipep | `run_database_search_pipeline.py` |
-| `pep` | msipep | `run_pep_pipeline.py` |
-| `pep-protcr` | protcr | `run_pep_pipeline.py` (ProTCR steps) |
-| `shell` | msipep | interactive bash |
-| `help` | — | usage text |
 
 ```bash
 # Module 4 full (steps 1–5)
 docker run --rm -v /host/data:/data -v /host/reference:/ref -v /host/software:/software \
   msipep:latest pep --config /data/SAMPLE01/pep_config.yaml
 
-# Module 4 ProTCR only (add --gpus all if GPU available)
-docker run --rm --gpus all -v /host/data:/data -v /host/software:/software \
-  msipep:latest pep-protcr \
-  --config /data/SAMPLE01/pep_config.yaml --from-step protcr_run
 ```
-
 In Docker configs, use paths such as `/ref/hg38/hg38.fa`, `/software/MSFragger-3.8`, `/data/SAMPLE01/...`.
 
-Optional: `cp docker-compose.example.yml docker-compose.yml`, edit volume paths, then `docker compose run --rm msipep pep --config /data/SAMPLE01/pep_config.yaml`.
-
 ## 5.4 Note on Docker Hub image `liupeng311/neoantigen-pipeline:msipep`
-
 That image documents **legacy** entry points (`rna_mut_pep.py`, `immunopep-filter.py`). For the current YAML-driven pipelines in this repository, build with the included `Dockerfile` as shown above.
 
